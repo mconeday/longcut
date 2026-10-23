@@ -81,12 +81,6 @@ assets/                 图标与插画
 2. 「导入项目」→ 目录选**本仓库根目录** → AppID 选「测试号」
 3. 编译即可（无需 npm 构建，无第三方运行时依赖）
 
-> ⚠️ 仓库版 `project.config.json` 使用 `touristappid`。请**不要把自己的 AppID 提交上来**；本机保留自己的 AppID 可用：
->
-> ```bash
-> git update-index --skip-worktree project.config.json
-> ```
-
 ## 真机部署：先配「用户隐私保护指引」
 
 开发者工具一切正常，真机上「图片没能读进来」、控制台见 `privacy fail ... errno:101`——这是 2023-09-15 起 `chooseMedia` / `getImageInfo` 等涉隐私接口受《用户隐私保护指引》管控：后台**未声明**或用户**未同意**时真机直接 fail，开发者工具不触发（以微信官方最新规则为准）。
