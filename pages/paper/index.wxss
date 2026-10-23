@@ -1,0 +1,314 @@
+/* P2 纸张设置：纸张预览卡、折叠态、拼接缝、规格与开关
+   尺寸按 375 宽设计稿 ×2 转 rpx，1px 虚线保留 px */
+
+.wrap { padding: 32rpx 0 240rpx; }
+
+/* 降级提示条 */
+.warn-bar {
+  width: var(--content-w);
+  margin: 0 auto 20rpx;
+  min-height: 80rpx;
+  padding: 10rpx 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background: #FFF6E5;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  color: #8A5300;
+}
+
+/* 纸张预览卡 335×280 */
+.paper-card {
+  position: relative;
+  width: var(--content-w);
+  height: 560rpx;
+  margin: 0 auto;
+  background: #E4E0D6;
+  border-radius: 28rpx;
+  box-shadow: inset 0 2rpx 6rpx rgba(28, 26, 23, 0.08);
+  overflow: hidden;
+  transition: height 220ms ease-out;
+}
+.paper-card.fold { height: 200rpx; }
+
+.est {
+  position: absolute;
+  top: 32rpx; right: 32rpx;
+  display: flex;
+  align-items: baseline;
+}
+.est-k {
+  font-size: 26rpx; line-height: 36rpx; font-weight: 500;
+  color: var(--text-2);
+  align-self: flex-start; margin-top: 6rpx;
+}
+.est-v {
+  font-size: 56rpx; line-height: 68rpx; font-weight: 600;
+  letter-spacing: -0.4rpx; color: var(--text-1);
+}
+.est-u { font-size: 28rpx; line-height: 40rpx; color: var(--text-2); }
+
+.paper-stage {
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 0 80rpx;
+  box-sizing: border-box;
+}
+.paper-mini {
+  position: relative;
+  background: #FFFFFF;
+  border: 1rpx solid #D8D4CA;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 6rpx rgba(28, 26, 23, 0.10);
+  overflow: hidden;
+  transition: width 220ms ease-out, height 220ms ease-out;
+}
+.pm-pad {
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: #FAFAF8;
+  box-sizing: border-box;
+  transition: padding 220ms ease-out;
+}
+.pm-content {
+  position: relative;
+  width: 100%; height: 100%;
+  background: #FFFFFF;
+  padding-top: 20rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.ph {
+  display: block;
+  height: 8rpx;
+  margin: 0 0 16rpx 20rpx;
+  border-radius: 4rpx;
+  background: #E2DFD6;
+}
+
+/* 四个 L 形角标，指向内容区四角 */
+.corner { position: absolute; width: 12rpx; height: 1px; background: #C6E4CE; }
+.corner::after {
+  content: '';
+  position: absolute;
+  width: 1px; height: 12rpx;
+  background: #C6E4CE;
+}
+.c-tl { top: 4rpx; left: 4rpx; }
+.c-tr { top: 4rpx; right: 4rpx; transform: scaleX(-1); }
+.c-bl { bottom: 4rpx; left: 4rpx; transform: scaleY(-1); }
+.c-br { bottom: 4rpx; right: 4rpx; transform: scale(-1, -1); }
+
+/* 拼接缝：横跨内容区的 1px 虚线 */
+.seam {
+  position: absolute;
+  left: 0; right: 0;
+  height: 0;
+  border-top: 1px dashed #C6E4CE;
+}
+
+.paper-caption {
+  position: absolute;
+  left: 132rpx; right: 136rpx; bottom: 28rpx;
+  text-align: center;
+  font-size: 26rpx; line-height: 36rpx; font-weight: 500;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 折叠态：纸形缩小，右侧两行信息 */
+.paper-card.fold .est,
+.paper-card.fold .paper-caption { display: none; }
+.paper-card.fold .paper-stage {
+  left: 24rpx; top: 24rpx; right: auto; bottom: auto;
+  display: block;
+  padding: 0;
+}
+.paper-card.fold .corner,
+.paper-card.fold .ph { display: none; }
+.paper-card.fold .pm-content { padding-top: 0; }
+
+.foldcol {
+  position: absolute;
+  left: 155rpx; right: 88rpx; top: 24rpx; bottom: 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.foldpages { display: flex; align-items: baseline; }
+.foldpages .est-k { margin-top: 0; align-self: baseline; font-size: 26rpx; line-height: 36rpx; }
+.fold-v { font-size: 34rpx; line-height: 48rpx; font-weight: 600; color: var(--text-1); }
+.foldpages .est-u { font-size: 26rpx; line-height: 36rpx; }
+.foldcap { display: flex; flex-direction: column; margin-top: 4rpx; }
+.foldcap-n { font-size: 30rpx; line-height: 40rpx; font-weight: 500; color: var(--text-1); }
+.foldcap-s {
+  font-size: 26rpx; line-height: 36rpx; color: var(--text-2);
+  white-space: nowrap;
+}
+
+.fold-btn {
+  position: absolute;
+  right: 12rpx; bottom: 4rpx;
+  width: 88rpx; height: 88rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.chev {
+  width: 16rpx; height: 16rpx;
+  border-left: 3rpx solid var(--text-2);
+  border-top: 3rpx solid var(--text-2);
+  transition: transform 220ms ease-out;
+}
+.chev-up { transform: rotate(45deg); margin-bottom: 8rpx; }
+.chev-dn { transform: rotate(225deg); }
+.paper-card.fold .chev-up { transform: rotate(225deg); margin-bottom: 8rpx; }
+.paper-card.fold .chev-dn { transform: rotate(45deg); }
+
+/* 拼接说明行 */
+.seam-note {
+  width: var(--content-w);
+  margin: 16rpx auto 0;
+  text-align: center;
+  font-size: 26rpx; line-height: 36rpx;
+  color: var(--text-2);
+}
+
+/* 页数过多的提示条 */
+.amber-bar {
+  width: var(--content-w);
+  margin: 20rpx auto 0;
+  min-height: 88rpx;
+  padding: 14rpx 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background: #FFF6E5;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  color: #8A5300;
+}
+
+/* 超短图信息卡 */
+.short-card {
+  width: var(--content-w);
+  height: 176rpx;
+  margin: 20rpx auto 0;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+  background: var(--paper);
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.short-main { display: flex; flex-direction: column; }
+.short-t { font-size: 30rpx; line-height: 44rpx; font-weight: 600; color: var(--text-1); }
+.short-t::before {
+  content: '';
+  display: inline-block;
+  width: 18rpx; height: 18rpx;
+  margin-right: 12rpx;
+  border: 3rpx solid var(--brand-500);
+  border-radius: 3rpx;
+  vertical-align: middle;
+}
+.short-s { font-size: 26rpx; line-height: 38rpx; color: var(--text-2); margin-top: 4rpx; }
+.short-act { font-size: 26rpx; color: var(--brand-500); padding: 20rpx 0 20rpx 20rpx; }
+
+/* 设置卡：规格、方向、边距 */
+.card { margin-top: 20rpx; }
+.pad { padding: 36rpx 32rpx; }
+.row-label { font-size: 28rpx; font-weight: 600; }
+.specs { display: flex; gap: 20rpx; margin: 24rpx 0 36rpx; }
+.spec {
+  position: relative; flex: 1; padding: 28rpx 0 20rpx;
+  border: 1rpx solid var(--line); border-radius: 16rpx;
+  display: flex; flex-direction: column; align-items: center; gap: 16rpx;
+  background: var(--paper);
+}
+.spec.on { border-color: var(--brand-500); background: var(--brand-50); box-shadow: inset 0 0 0 3rpx var(--brand-500); }
+.spec-box { border: 3rpx solid var(--text-3); border-radius: 6rpx; }
+.spec.on .spec-box { border-color: var(--brand-500); }
+.spec-name { font-size: 26rpx; }
+.check {
+  position: absolute; top: 12rpx; right: 12rpx;
+  width: 36rpx; height: 36rpx; border-radius: 50%;
+  background: var(--brand-500); color: #fff; font-size: 24rpx;
+  display: flex; align-items: center; justify-content: center;
+}
+.row-line {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24rpx 0; border-top: 1rpx solid var(--line);
+}
+.seg { display: flex; background: var(--n-50); border: 1rpx solid var(--line); border-radius: 14rpx; padding: 4rpx; gap: 4rpx; box-sizing: border-box; }
+.seg-item { padding: 12rpx 36rpx; font-size: 28rpx; border-radius: 10rpx; color: var(--text-2); }
+/* 选中项：白底 + 绿描边 + 绿字 */
+.seg-item.on { background: var(--paper); color: var(--brand-700); font-weight: 600; box-shadow: 0 0 0 1px var(--brand-500); }
+.margin-val { font-size: 34rpx; font-weight: 600; }
+.unit { font-size: 24rpx; color: var(--text-3); margin-left: 4rpx; }
+.chips { display: flex; gap: 16rpx; margin-top: 8rpx; }
+.chip {
+  padding: 14rpx 26rpx; border-radius: 999rpx;
+  border: 1rpx solid var(--line); font-size: 26rpx; color: var(--text-2);
+}
+.chip.on { background: var(--brand-50); border-color: var(--brand-500); color: var(--brand-700); }
+/* slider 两端与中值刻度 */
+.ticks { display: flex; justify-content: space-between; font-size: 22rpx; color: var(--text-3); }
+
+/* 开关行：整行 44 高可点 */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  margin-top: 8rpx;
+  border-top: 1rpx dashed var(--line);
+}
+.switch-main { font-size: 32rpx; line-height: 48rpx; color: var(--text-1); }
+.switch-track {
+  position: relative;
+  flex: 0 0 88rpx;
+  width: 88rpx; height: 48rpx;
+  border-radius: 24rpx;
+  background: #D8D4CA;
+  transition: background 120ms ease-out;
+}
+.switch-track.on { background: var(--brand-500); }
+.switch-thumb {
+  position: absolute;
+  top: 4rpx; left: 4rpx;
+  width: 40rpx; height: 40rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+  transition: left 120ms ease-out;
+}
+.switch-track.on .switch-thumb {
+  left: 44rpx;
+  box-shadow: 0 2rpx 6rpx rgba(28, 26, 23, 0.18);
+}
+.switch-note {
+  margin-top: 4rpx;
+  font-size: 26rpx; line-height: 36rpx;
+  color: #8A5300;
+}
+
+.hint { margin-top: 28rpx; font-size: 24rpx; line-height: 34rpx; color: var(--text-3); }
+.hint.warn { color: #8A5300; }
+
+.err-line {
+  width: var(--content-w);
+  margin: 20rpx auto 0;
+  text-align: center;
+  font-size: 28rpx; line-height: 40rpx;
+  color: #96231A;
+}

@@ -1,0 +1,117 @@
+<mp-navigation-bar title="长图转PDF" back="{{false}}" background="#ffffff" />
+
+<view class="wrap">
+  <!-- 头部主视觉：插画 + 图下标题（方案 A：图上文下，不遮插画） -->
+  <view class="hero">
+    <image class="hero-illu" src="/assets/home/hero.png" mode="aspectFill" />
+    <view class="hero-title">长截图，转成能打印的 PDF</view>
+    <view class="hero-sub">自动在空白处切页，一行字都不会被截断</view>
+  </view>
+
+  <!-- 隐私行（§3a L1）：事实陈述 + 右侧「查看 ›」→ S5 飞行模式自测。空/已选态各放一处，均在内容之后（设计稿 p1） -->
+  <block wx:if="{{count === 0}}">
+    <view class="pickcards">
+      <view class="pickcard" bindtap="onPick">
+        <image class="pc-img" src="/assets/home/pick-album.png" mode="aspectFill" />
+        <view class="pc-tt">从相册选</view>
+      </view>
+      <view class="pickcard" bindtap="onPickChat">
+        <image class="pc-img" src="/assets/home/pick-chat.png" mode="aspectFill" />
+        <view class="pc-tt">从聊天记录选</view>
+      </view>
+    </view>
+    <view class="pc-note">最多 4 张 · 长度不限</view>
+    <view class="trust">
+      <view class="dot"></view>
+      <view class="trust-t">图片只在本机处理</view>
+      <text class="trust-a" catchtap="onPrivacy">查看 ›</text>
+    </view>
+  </block>
+
+  <!-- 已选态：缩略图卡（§3f：底部缩略图 72×96、长按 400ms 拖动排序） -->
+  <block wx:else>
+    <view class="pick-card">
+      <view class="pick-head">
+        <!-- 尺寸计算中不给假数字（合计 0px 会误导，也算不准上限） -->
+        <text class="pick-count">{{scanning ? '已选 ' + count + ' 张 · 计算中…' : '已选 ' + count + ' 张 · 合计 ' + totalH + 'px'}}</text>
+        <text class="pick-hint" wx:if="{{!scanning}}">{{count >= maxCount ? '已满 ' + maxCount + ' 张' : '长按可拖动排序'}}</text>
+      </view>
+      <scroll-view class="pick-strip" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="pick-row {{count >= maxCount ? 'full' : ''}}">
+          <block wx:for="{{images}}" wx:key="path" wx:for-index="index">
+            <!-- 就绪槽位：可拖动排序、可删除（加载中整条不进交互，见 js 守卫） -->
+            <view wx:if="{{item.width > 0}}"
+                  class="pick-thumb {{dragIdx === index ? 'lift' : ''}}"
+                  style="{{dragIdx === index ? dragStyle : 'transform: translateX(' + (shifts[index] || 0) + 'rpx);'}}"
+                  data-i="{{index}}"
+                  catchtouchstart="onThumbTouchStart"
+                  catchtouchmove="onThumbTouchMove"
+                  catchtouchend="onThumbTouchEnd"
+                  catchtouchcancel="onThumbTouchCancel">
+              <image class="pick-img" src="{{item.path}}" mode="aspectFill" />
+              <text class="pick-no">{{index + 1}}</text>
+              <view class="pick-del" data-del="{{index}}"><text class="pick-del-ic" data-del="{{index}}">×</text></view>
+            </view>
+            <!-- 未就绪槽位：居中转圈（2026-10-21 爸爸确认的加载态），哪张先算完哪张先亮 -->
+            <view wx:else class="pick-thumb scanning">
+              <view class="pick-spin"></view>
+            </view>
+          </block>
+          <view class="pick-add" bindtap="onAddMore" wx:if="{{count < maxCount}}">＋</view>
+        </view>
+      </scroll-view>
+    </view>
+    <view class="trust">
+      <view class="dot"></view>
+      <view class="trust-t">图片只在本机处理，不上传</view>
+      <text class="trust-a" catchtap="onPrivacy">查看 ›</text>
+    </view>
+    <!-- 尺寸没算完按钮锁死（disabled 态走全局 .btn-main.disabled 灰底）：
+         算完自动变绿放行。onNext 里也有 scanning 卫语句双保险。
+         加载态带白圈 spinner + 「加载中…」（2026-10-21 爸爸确认） -->
+    <view class="btn-main {{scanning ? 'disabled' : ''}}" bindtap="onNext">
+      <view class="btn-spin" wx:if="{{scanning}}"></view>
+      <text>{{scanning ? '加载中…' : '下一步：选纸张'}}</text>
+    </view>
+  </block>
+
+  <!-- 历史入口：设计在导航栏右上，系统导航栏放不进去，改在这里（44px 热区） -->
+  <view class="hist" bindtap="onHistory">历史文件 ›</view>
+</view>
+
+<!-- S1 超长图拦截（§3b）：半屏，默认推荐分段，但保留「仍然继续」 -->
+<view class="mask" wx:if="{{s1Open}}" bindtap="onS1Close">
+  <view class="sheet" catchtap="noop">
+    <!-- 建议页 -->
+    <block wx:if="{{!s1Steps}}">
+      <view class="sheet-title">{{s1Title}}</view>
+      <view class="sheet-sub">{{s1Body}}</view>
+      <view class="btn-main sheet-btn" bindtap="onS1Split" wx:if="{{s1Kind !== 'count'}}">
+        分段处理（推荐）
+      </view>
+      <view class="btn-ghost" bindtap="onS1Continue" wx:if="{{s1Kind !== 'count'}}">
+        仍然继续，可能失败
+      </view>
+      <view class="btn-text" bindtap="onS1Other">换一张图</view>
+    </block>
+
+    <!-- 三步图文（§3b：不离开小程序，并给出具体段数） -->
+    <block wx:else>
+      <view class="sheet-title">分成 {{s1Seg}} 段处理</view>
+      <view class="sheet-sub">不用去别的 App，就在相册里裁，裁完回来一次选进</view>
+      <view class="step">
+        <view class="step-n">1</view>
+        <view class="step-t">在相册里打开这张图，用「编辑」把它裁成 {{s1Seg}} 段，每段不超过 20000px 高</view>
+      </view>
+      <view class="step">
+        <view class="step-n">2</view>
+        <view class="step-t">回到这里，按从上到下的顺序把它们一起选中</view>
+      </view>
+      <view class="step">
+        <view class="step-n">3</view>
+        <view class="step-t">会自动拼成一张，跨段的地方自动切开，其它完全一样</view>
+      </view>
+      <view class="btn-main sheet-btn" bindtap="onS1Pick">去选这 {{s1Seg}} 张图</view>
+    </block>
+  </view>
+</view>

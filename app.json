@@ -1,0 +1,25 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/paper/index",
+    "pages/process/index",
+    "pages/preview/index",
+    "pages/adjust/index",
+    "pages/result/index",
+    "pages/history/index",
+    "pages/settings/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTitleText": "长图转PDF",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFFFFF",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "usingComponents": {
+    "mp-navigation-bar": "/components/navigation-bar/navigation-bar"
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

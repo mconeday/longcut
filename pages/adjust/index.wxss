@@ -1,0 +1,161 @@
+/* 精调分页 */
+
+.wrap { display: flex; flex-direction: column; height: 100vh; }
+
+/* 顶部提示条：min-height 不能用固定高（文案换行会溢出压到图上）。
+   边界提示只换字色，到边界是正常状态不是异常 */
+.tip {
+  min-height: 80rpx; box-sizing: border-box;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8rpx 40rpx; background: #F3FAF5;
+}
+.tip-t { font-size: 28rpx; line-height: 36rpx; color: #1B5335; transition: color 120ms; }
+.tip-t.warn { color: #6B665C; }
+.tip-r { display: flex; align-items: center; }
+.undo {
+  font-size: 28rpx; color: #1B5335; padding: 12rpx 0 12rpx 32rpx;  /* 44px 热区 */
+  white-space: nowrap;
+}
+.undo.off { color: #7A7568; }
+.pages { font-size: 26rpx; color: var(--text-3); margin-left: 24rpx; white-space: nowrap; }
+
+/* 长图视口：宽度用 --content-w（不是 P4 的 --paper-w）。
+   滚动盒就是卡片本体，按钮栏在流里，滚到头也不遮内容；
+   卡片首尾各垫 20rpx 占位，最后一条切口带停在占位上 */
+.stage {
+  flex: 1; min-height: 0; margin: 20rpx auto 0;
+  width: var(--content-w);
+  background: var(--paper);
+  border: 1rpx solid var(--brand-100); border-radius: 16rpx;
+  box-sizing: border-box;
+}
+.canvas-pad { height: 20rpx; }
+.canvas {
+  position: relative; width: var(--content-w); margin: 0 auto;
+  background: var(--paper);
+}
+.pic { position: absolute; left: 0; width: 100%; display: block; }
+
+/* 禁切区：内容块 tint + 左缘 2px 竖条 */
+.nozone {
+  position: absolute; left: 0; right: 0;
+  background: rgba(28, 26, 23, 0.04);
+  border-left: 2px solid rgba(28, 26, 23, 0.30);
+  box-sizing: border-box;
+}
+
+/* 切口带：元素高 44px 是热区，视觉带高由空白带决定（cuts.bandLayout）。
+   虚线只能用 repeating-linear-gradient，border 的 dash 不可控 */
+.band {
+  position: absolute; left: 0; right: 0; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  transition: top 60ms linear;
+}
+.visual {
+  position: relative; width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  transition: height 120ms ease-out;
+}
+.rule {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: repeating-linear-gradient(to right, rgba(28, 26, 23, 0.32) 0 6px, transparent 6px 10px);
+  transition: background 180ms;
+}
+.rule { top: 0; }
+.rule.b { top: auto; bottom: 0; }
+
+/* 密集分页点：折叠的切口带只留一条 1px 虚线，点一下才展开 */
+.band.mini .grip { display: none; }
+.band.mini .blabel { display: none; }
+.band.mini .visual { height: 1px !important; }
+.band.mini .rule { display: none; }
+.band.mini .visual::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: repeating-linear-gradient(to right, rgba(28, 26, 23, 0.32) 0 6px, transparent 6px 10px);
+}
+
+/* 窄空白带（<8px）：带子退化成一条线，抓手去掉——画了就是压着内容 */
+.band.line .grip { display: none; }
+.band.line .rule.b { display: none; }
+.grip {
+  width: 88rpx; height: 10rpx; border-radius: 5rpx; background: #B9B4A8;
+  transition: background 180ms;
+}
+/* 选中态：灰虚线 → 绿实虚线加粗到 2px，抓手变深绿，带底 7% 绿衬，页码标变绿加粗 */
+.band.sel { background: rgba(46, 132, 85, 0.07); }
+.band.sel .grip { background: var(--brand-500, #2E8455); }
+.band.sel .rule {
+  height: 2px;
+  background: repeating-linear-gradient(to right, rgba(46, 132, 85, 0.95) 0 6px, transparent 6px 10px);
+}
+.blabel {
+  position: absolute; right: 16rpx; top: 50%; transform: translateY(-50%);
+  font-size: 24rpx; color: var(--text-3, #8A857A);
+}
+.band.sel .blabel { color: var(--brand-700, #1B5335); font-weight: 600; }
+
+/* 危险态：虚线变实线（失去安全暗示）、抓手变红、6% 红底、文案换「此处会截断内容」 */
+.band.danger { background: rgba(194, 54, 43, 0.06); }
+.band.danger .rule { background: #C2362B; }
+.band.danger .grip { background: #C2362B; }
+.band.danger .blabel {
+  color: #96231A; font-size: 26rpx; font-weight: 500;
+}
+
+/* 右侧刻度尺：12px 槽。必须收在卡内右缘，放左侧会压头像区 */
+.ruler {
+  position: absolute; top: 0; bottom: 0; right: 4rpx; width: 24rpx;
+}
+.ruler-base {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 1px;
+  background: #D8D4CA;
+}
+.tick {
+  position: absolute; left: 50%; transform: translate(-50%, -50%);
+  width: 5px; height: 2px; background: #61AE80;
+  transition: width 120ms, height 120ms, background 120ms;
+}
+.tick.cur { width: 9px; height: 3px; background: #2E8455; }
+
+/* 吸底栏三态：同位置 180ms 交叉淡入，宽度不变避免按钮移位。
+   必须覆写成 static——全局 .bottombar 是 fixed，会浮在滚动区上遮内容 */
+.bottombar {
+  position: static;
+  width: var(--content-w);
+  margin: 0 auto;
+  padding: 16rpx 0 calc(16rpx + env(safe-area-inset-bottom));
+  display: flex; gap: 16rpx; align-items: center;
+  min-height: 152rpx; box-sizing: content-box;
+  background: transparent;
+}
+.bottombar > view { transition: opacity 180ms; }
+
+.btn-main {
+  flex: 1; height: 96rpx; border-radius: 16rpx;
+  background: var(--brand-500, #2E8455); color: #fff;
+  font-size: 32rpx; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 精调按钮：图标 + 文字，禁用不隐藏 */
+.btn-nav {
+  width: 192rpx; height: 88rpx; flex: none;
+  border-radius: 12rpx; background: #fff; border: 1px solid var(--line, #D8D4CA);
+  color: #1B5335; font-size: 30rpx; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+.btn-nav.hv { background: #F4F7FA; }
+.btn-nav.off {
+  background: #F4F2ED; border-color: #D8D4CA; color: #7A7568;
+  /* 禁用零反馈：不给 hover、不缩放、不震动 */
+}
+
+/* 完成调整：白底 + 绿框次按钮，不是蓝底主按钮（同一位置两义会让人以为点了就保存）。
+   永不禁用——本屏唯一出口 */
+.btn-finish {
+  width: 254rpx; height: 96rpx; flex: none;
+  border-radius: 16rpx; background: #fff; border: 1px solid #2E8455; box-sizing: border-box;
+  color: #1B5335; font-size: 32rpx; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+}

@@ -1,0 +1,84 @@
+/* P8 设置与隐私：隐私卡 + 功能行 + 自证半屏 */
+
+.wrap { padding: 24rpx 0 0; }
+
+.card {
+  width: var(--content-w); margin: 0 auto;
+  background: var(--paper); border-radius: 16rpx;
+  padding: 36rpx 32rpx; box-sizing: border-box;
+}
+.h { font-size: 34rpx; line-height: 48rpx; font-weight: 600; color: var(--text-1); }
+.p { margin-top: 12rpx; font-size: 30rpx; line-height: 44rpx; color: var(--text-1); }
+
+/* 离线能力卡 */
+.off-row {
+  display: flex; align-items: center; gap: 20rpx;
+  background: var(--brand-50); border-radius: 14rpx;
+  padding: 24rpx; box-sizing: border-box;
+}
+.off-ic {
+  flex: none; width: 64rpx; height: 64rpx; border-radius: 50%;
+  background: var(--brand-500); color: #fff;
+  font-size: 30rpx; display: flex; align-items: center; justify-content: center;
+}
+.off-t { font-size: 30rpx; line-height: 42rpx; font-weight: 600; color: var(--brand-700); }
+.off-s { margin-top: 4rpx; font-size: 25rpx; line-height: 36rpx; color: var(--text-2); }
+.netlink {
+  margin-top: 8rpx; padding: 12rpx 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.netlink-t { font-size: 26rpx; color: var(--brand-700, #1B5335); }
+.netlink-a { color: var(--text-3); font-size: 32rpx; }
+
+.sep { height: 16rpx; background: transparent; }
+
+/* 功能行 56px 高 */
+.row {
+  width: var(--content-w); margin: 0 auto;
+  height: 112rpx; box-sizing: border-box;
+  display: flex; align-items: center;
+  border-bottom: 1px solid #E8E5DE;
+  padding: 0 8rpx;
+}
+/* 行首图标：浅绿圆底 + brand-600 图形 */
+.row-ic {
+  flex: none; width: 40rpx; height: 40rpx; margin-right: 16rpx;
+  border-radius: 50%; background: var(--brand-50);
+  display: flex; align-items: center; justify-content: center;
+}
+.ic-glyph { font-size: 24rpx; line-height: 1; font-weight: 600; color: var(--brand-600); }
+/* 垃圾桶图标：桶身 + 盖子 + 竖纹 */
+.ic-trash {
+  position: relative; width: 20rpx; height: 24rpx;
+  border: 3rpx solid var(--brand-600); border-top: none;
+  border-radius: 0 0 6rpx 6rpx; box-sizing: border-box;
+}
+.ic-trash::before {
+  content: ''; position: absolute; top: -7rpx; left: -7rpx; right: -7rpx;
+  height: 4rpx; border-radius: 2rpx; background: var(--brand-600);
+}
+.ic-trash::after {
+  content: ''; position: absolute; top: 5rpx; left: 4rpx; right: 4rpx; height: 11rpx;
+  border-left: 3rpx solid var(--brand-600); border-right: 3rpx solid var(--brand-600);
+}
+.row-t { font-size: 30rpx; color: var(--text-1); }
+.row-v { margin-left: auto; margin-right: 12rpx; font-size: 26rpx; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.row-a { margin-left: auto; color: var(--text-3); font-size: 32rpx; }
+.row-v + .row-a { margin-left: 0; }
+
+/* S5 半屏 */
+.mask { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  padding: 40rpx 40rpx calc(32rpx + env(safe-area-inset-bottom));
+  background: var(--paper); border-radius: 28rpx 28rpx 0 0;
+  box-sizing: border-box;
+}
+.sheet-t { font-size: 36rpx; line-height: 48rpx; font-weight: 600; margin-bottom: 24rpx; }
+.step { font-size: 30rpx; line-height: 48rpx; color: var(--text-1); }
+.btn-main {
+  margin-top: 40rpx; height: 96rpx; border-radius: 16rpx;
+  background: var(--brand-500, #2E8455); color: #fff;
+  font-size: 32rpx; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}

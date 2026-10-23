@@ -1,0 +1,95 @@
+/* 全局 Token：色阶与尺寸的唯一来源，禁止在页面里另写数值 */
+page {
+  /* 品牌色 · 森绿九阶 */
+  --brand-50:  #F3FAF5;
+  --brand-100: #E4F3E8;
+  --brand-200: #C6E4CE;
+  --brand-300: #96CBAA;
+  --brand-400: #61AE80;
+  --brand-500: #2E8455;
+  --brand-600: #246B45;
+  --brand-700: #1B5335;
+  --brand-800: #133C26;
+  --danger-500: #C2362B;
+  /* 页面底色：顶部纯白接导航栏，向下渐隐 */
+  --page-bg-top: #FFFFFF;
+  --page-bg-bot: #F1F8F3;
+  --paper: #FFFFFF;
+  --line: #E2DFD6;
+  --n-50: #FAFAF8;
+  --text-1: #1F1D18;
+  --text-2: #5C574C;
+  --text-3: #8A857A;
+  --text-disabled: #7A7568;
+
+  /* 两个宽度变量不可合并 */
+  --content-w: 670rpx;            /* 335px：卡片 / P5 长图 / 切口带 */
+  --p5-canvas-w: var(--content-w);/* P5 长图与切口带共用 */
+  --paper-w: 600rpx;              /* 300px：P4 纸张 */
+
+  background: linear-gradient(180deg, var(--page-bg-top) 0%, var(--page-bg-bot) 100%);
+  min-height: 100vh;
+  color: var(--text-1);
+  font-size: 28rpx;
+  line-height: 40rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 公共组件 */
+.card {
+  width: var(--content-w);
+  margin: 0 auto;
+  background: var(--paper);
+  border-radius: 20rpx;
+  box-sizing: border-box;
+}
+.btn-main {
+  width: var(--content-w);
+  height: 96rpx;
+  border-radius: 20rpx;
+  background: var(--brand-500);
+  color: #FFFFFF;
+  font-size: 34rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-main.disabled { background: #E8E5DE; color: var(--text-disabled); }
+.btn-sub {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 20rpx;
+  background: var(--paper);
+  border: 1rpx solid var(--line);
+  color: var(--text-1);
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-emph {
+  width: 254rpx;
+  height: 96rpx;
+  border-radius: 20rpx;
+  background: var(--paper);
+  border: 1rpx solid var(--brand-500);
+  color: var(--brand-700);
+  font-size: 32rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 吸底栏：顶部 20rpx 渐隐，避开硬边 */
+.bottombar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  padding: 28rpx 40rpx calc(28rpx + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 20rpx;
+  background: linear-gradient(180deg, rgba(241, 248, 243, 0) 0%, var(--page-bg-bot) 22%);
+}
+.title-xl { font-size: 56rpx; line-height: 72rpx; font-weight: 600; letter-spacing: 0.4rpx; }
+.text-sub { font-size: 28rpx; color: var(--text-2); }
+.text-dim { font-size: 24rpx; color: var(--text-3); }

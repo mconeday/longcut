@@ -1,0 +1,170 @@
+<canvas class="export-canvas" type="2d" id="export-canvas"></canvas>
+
+<!-- 2026-10-21 爸爸定：用 WeUI navigation-bar 组件做自定义导航（返回键可动态控制）。
+     查看态（从历史进）：显示返回箭头，组件默认行为 = navigateBack 正常回上一页
+     （2026-10-21 修：不绑 bindback——组件自身会执行返回，再绑会连退两页）；
+     流程态（从预览进）：不显示返回箭头，left slot 放小房子回首页。
+     标题随来源切换：文档详情 / 导出结果 -->
+<mp-navigation-bar
+  title="{{fromHistory ? '文档详情' : '导出结果'}}"
+  back="{{fromHistory}}"
+  background="#ffffff"
+>
+  <!-- 流程态（back=false 时 left slot 生效）：小房子 = 直接回首页
+       （2026-10-21 爸爸定：reLaunch 清栈 + 清草稿，同「继续生成」逻辑；
+       图标用爸爸提供的 assets/home-icon.png）。
+       查看态 back=true 显示返回箭头，slot 自动失效，不会两个都出 -->
+  <image
+    slot="left"
+    wx:if="{{!fromHistory}}"
+    class="nav-home"
+    src="/assets/home-icon.png"
+    mode="aspectFit"
+    hover-class="nav-home-active"
+    bindtap="onNavHome"
+    aria-role="button"
+    aria-label="首页"
+  />
+</mp-navigation-bar>
+
+<view class="wrap">
+  <!-- ① 生成中 -->
+  <block wx:if="{{state==='loading'}}">
+    <view class="spin"></view>
+    <view class="title">正在生成 PDF</view>
+    <view class="progress-line">第 {{done}}/{{total}} 页</view>
+    <view class="compress" wx:if="{{compressTip}}">{{compressTip}}</view>
+    <view class="bottombar">
+      <view class="btn-main disabled">正在生成…</view>
+    </view>
+  </block>
+
+  <!-- ② 成功 -->
+  <block wx:elif="{{state==='ok'}}">
+    <view class="ok-icon">✓</view>
+    <view class="title">PDF 已生成</view>
+
+    <view class="card file">
+      <!-- 封面固定用爸爸提供的 pdf.png（2026-10-21 爸爸定）：真封面在直嵌模式下
+           压出来可能这台设备显示不出，与其随机空白不如恒定图标 -->
+      <image class="cover-img pdf-default" src="/assets/history/pdf.png" mode="aspectFit" />
+      <view class="file-main">
+        <view class="fname">{{filename}}</view>
+        <view class="meta">{{pages}} 页 · {{paperName}} · {{sizeText}}</view>
+        <view class="ts">刚刚生成</view>
+      </view>
+    </view>
+
+    <view class="note" wx:if="{{degradedTip}}">{{degradedTip}}</view>
+    <view class="note" wx:if="{{tooManyTip}}">{{tooManyTip}}</view>
+    <view class="note" wx:if="{{extraTip}}">{{extraTip}}</view>
+
+    <view class="tipbar" bindtap="onPrintTip">
+      <text class="tipbar-t">打印时选「实际大小」，不要选「适应页面」</text>
+      <text class="tipbar-a">打印设置 ›</text>
+    </view>
+
+    <view class="rows">
+      <view class="row" bindtap="onRename"><text class="row-i">✎</text>重命名<text class="row-a">›</text></view>
+      <view class="row" bindtap="onSave"><text class="row-i">⤓</text>存到文件 / 打印<text class="row-a">›</text></view>
+      <view class="row" bindtap="onHistory"><text class="row-i">▤</text>查看历史<text class="row-a">›</text></view>
+    </view>
+
+    <!-- 转发到微信：这页的终局动作，独占一张大绿钮、压在列表正下方（用户定） -->
+    <view class="share-big" bindtap="onShare">转发到微信</view>
+
+    <view class="bottombar">
+      <view class="btn-sub btn-wide" bindtap="onAgain">继续生成</view>
+    </view>
+  </block>
+
+  <!-- ③ 超 10MB（允许导出，不硬拦） -->
+  <block wx:elif="{{state==='over'}}">
+    <view class="warn-icon">!</view>
+    <view class="title">文件有 {{overSize}}MB，超过微信转发上限</view>
+    <view class="sub">已降到最低清晰度还是太大。分成两份能解决。</view>
+    <view class="note" wx:if="{{degradedTip}}">{{degradedTip}}</view>
+    <view class="bottombar">
+      <view class="btn-sub" bindtap="onForceExport">仍然导出这一份</view>
+      <view class="btn-main w127" bindtap="onSplit">分成 2 份导出</view>
+    </view>
+  </block>
+
+  <!-- ②b 查看态（从 P7 历史点进来，只读；主按钮仍是「转发到微信」） -->
+  <block wx:elif="{{state==='view'}}">
+    <view class="card file">
+      <image class="cover-img pdf-default" src="/assets/history/pdf.png" mode="aspectFit" />
+      <view class="file-main">
+        <view class="fname">{{filename}}</view>
+        <view class="meta">{{pages}} 页 · {{paperName}} · {{sizeText}}</view>
+        <view class="ts">{{dateText}}</view>
+      </view>
+    </view>
+
+    <view class="tipbar" bindtap="onPrintTip">
+      <text class="tipbar-t">打印时选「实际大小」，不要选「适应页面」</text>
+      <text class="tipbar-a">打印设置 ›</text>
+    </view>
+
+    <view class="rows">
+      <view class="row" bindtap="onRename"><text class="row-i">✎</text>重命名<text class="row-a">›</text></view>
+      <view class="row" bindtap="onSave"><text class="row-i">⤓</text>存到文件 / 打印<text class="row-a">›</text></view>
+    </view>
+
+    <view class="share-big" bindtap="onShare">转发到微信</view>
+
+    <!-- 查看态文案「回到首页」（2026-10-21 爸爸定）：行为不变——清草稿 + reLaunch 清栈 -->
+    <view class="bottombar">
+      <view class="btn-sub btn-wide" bindtap="onAgain">回到首页</view>
+    </view>
+  </block>
+
+  <!-- ②c 空态（4.6.3：从 P7 进来但文件已被清理）。
+       图标+文字整体垂直居中（2026-10-21 爸爸定），不留一大片下方空白 -->
+  <block wx:elif="{{state==='empty'}}">
+    <view class="empty-mid" style="height: calc(100vh - {{statusBarH + navContentH}}px - 340rpx)">
+      <image class="absent-ic" src="/assets/history/absent.png" mode="aspectFit" />
+      <view class="title">文件已经不在了</view>
+      <view class="sub">本地只保留 7 天，超过后自动删除</view>
+    </view>
+    <view class="bottombar">
+      <view class="btn-main" bindtap="onDeleteRecord">清除该记录</view>
+    </view>
+  </block>
+
+  <!-- ④ 生成失败 -->
+  <block wx:elif="{{state==='error'}}">
+    <view class="warn-icon">!</view>
+    <view class="title">{{errTitle}}</view>
+    <view class="sub">{{errSub}}</view>
+    <view class="bottombar">
+      <view class="btn-sub" bindtap="onBackPreview">返回预览</view>
+      <view class="btn-main w127" bindtap="onRetry">重试</view>
+    </view>
+  </block>
+</view>
+
+<!-- ⑤ 存储已满（4.6.2 半屏） -->
+<view class="mask" wx:if="{{state==='nospace'}}" catchtap="onRetrySpace"></view>
+<view class="sheet" wx:if="{{state==='nospace'}}">
+  <view class="sheet-title">手机存储空间不够了</view>
+  <view class="sheet-sub">可以先删掉历史里的旧文件，再回来点重试。</view>
+  <view class="sheet-act">
+    <view class="btn-sub" bindtap="onRetrySpace">重试</view>
+    <view class="btn-main w127" bindtap="onCleanHistory">清理历史文件</view>
+  </view>
+</view>
+
+<!-- ⑥ 重命名（2026-10-21 爸爸定，仅查看态）：改 PDF 名时 .cover.jpg 一起改，
+     历史条目同步更新；失败（文件被占用/不存在）如实提示，不改条目 -->
+<view class="mask" wx:if="{{rnOpen}}" catchtap="onRnCancel"></view>
+<view class="sheet" wx:if="{{rnOpen}}">
+  <view class="sheet-title">重命名</view>
+  <input class="rn-input" value="{{rnValue}}" focus placeholder="输入新的文件名"
+         maxlength="60" bindinput="onRnInput" />
+  <view class="rn-err" wx:if="{{rnErr}}">{{rnErr}}</view>
+  <view class="sheet-act">
+    <view class="btn-sub" bindtap="onRnCancel">取消</view>
+    <view class="btn-main w127" bindtap="onRnConfirm">确认</view>
+  </view>
+</view>

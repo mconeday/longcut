@@ -1,0 +1,68 @@
+<mp-navigation-bar title="微调分页" background="#ffffff" />
+
+<view class="wrap" style="height: calc(100vh - {{navH}}px)">
+  <!-- 顶部提示条（40px，#F3FAF5）。边界提示只换文案+字色，不变底色不用琥珀 -->
+  <view class="tip">
+    <text class="tip-t {{tipWarn ? 'warn' : ''}}">{{tip}}</text>
+    <view class="tip-r">
+      <!-- 撤销：设计稿放自绘导航栏，本项目用系统导航栏放不下，放这里（44px 热区） -->
+      <text class="undo {{canUndo ? '' : 'off'}}" catchtap="onUndo">撤销</text>
+      <text class="pages">{{pageCount}} 页</text>
+    </view>
+  </view>
+
+  <scroll-view class="stage" scroll-y catchtap="onStageTap" bindscroll="onScroll">
+    <view class="canvas-pad"></view>
+    <view class="canvas" style="height:{{imgHCss}}px">
+      <!-- 多图：按虚拟坐标把 N 张图铺成一条长图；单图时就是 1 张、铺满 -->
+      <image class="pic" wx:for="{{pics}}" wx:key="path" src="{{item.path}}" mode="scaleToFill"
+             style="top:{{item.top}}px;height:{{item.h}}px" />
+
+      <!-- 禁切区提示：内容块 tint + 左缘 2px 竖条 -->
+      <view class="nozone" wx:for="{{zones}}" wx:for-item="z" wx:key="y"
+            style="top:{{z.y}}px;height:{{z.h}}px"></view>
+
+      <!-- 切口带：44px 热区（元素高），视觉带 24px 居中；拖动改位置，点按进精调。
+           危险态（拖进内容块）在松手之前就转红，见视觉 §5.8.3 -->
+      <view class="band {{mode === 'edit' && sel === index ? 'sel' : ''}} {{dangerIdx === index ? 'danger' : ''}} {{item.mini ? 'mini' : ''}} {{item.lineOnly ? 'line' : ''}}"
+            wx:for="{{bands}}" wx:for-index="index" wx:key="label"
+            style="top:{{item.top}}px"
+            data-i="{{index}}"
+            catchtouchstart="onBandTouchStart"
+            catchtouchmove="onBandTouchMove"
+            catchtouchend="onBandTouchEnd"
+            catchtouchcancel="onBandTouchEnd"
+            catchtap="noop">
+        <!-- 切口带本体：高度随空白带收缩（窄空白带不许盖住内容），最小 8px -->
+        <view class="visual" style="height:{{item.bh}}px">
+          <view class="rule"></view>
+          <view class="grip"></view>
+          <view class="rule b"></view>
+        </view>
+        <text class="blabel">{{dangerIdx === index ? '此处会截断内容' : item.label}}</text>
+      </view>
+
+      <!-- 右侧刻度尺：基线 + 切点标记（普通 5×2 / 当前 9×3），随内容滚动 -->
+      <view class="ruler">
+        <view class="ruler-base"></view>
+        <view class="tick {{mode === 'edit' && sel === index ? 'cur' : ''}}"
+              wx:for="{{ticks}}" wx:for-index="index" wx:key="y"
+              style="top:{{item.y}}px"></view>
+      </view>
+    </view>
+    <view class="canvas-pad"></view>
+  </scroll-view>
+
+  <!-- 吸底栏三态（同一位置，180ms 交叉淡入；宽度不变避免按钮移位） -->
+  <view class="bottombar {{mode}}">
+    <view class="btn-main" wx:if="{{mode === 'default'}}" bindtap="onUsePages">用这次的分页（{{pageCount}} 页）</view>
+    <block wx:else>
+      <!-- 精调：两个次按钮 + 一个次按钮·强调。本态主按钮 0 个（§2.5：颜色=语义） -->
+      <view class="btn-nav {{canUp ? '' : 'off'}}" data-dir="-1" hover-class="{{canUp ? 'hv' : 'none'}}"
+            catchtouchstart="onNavTouchStart" catchtouchend="onNavTouchEnd" catchtouchcancel="onNavTouchEnd">↑ 上移</view>
+      <view class="btn-nav {{canDown ? '' : 'off'}}" data-dir="1" hover-class="{{canDown ? 'hv' : 'none'}}"
+            catchtouchstart="onNavTouchStart" catchtouchend="onNavTouchEnd" catchtouchcancel="onNavTouchEnd">↓ 下移</view>
+      <view class="btn-finish" bindtap="onFinishAdjust">完成调整</view>
+    </block>
+  </view>
+</view>

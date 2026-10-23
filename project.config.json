@@ -1,0 +1,13 @@
+{
+  "description": "长截图转打印PDF",
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "libVersion": "3.4.10",
+  "setting": {
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "ignoreUploadUnusedFiles": true
+  },
+  "projectname": "longcut"
+}

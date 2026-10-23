@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "导出结果",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "mp-navigation-bar": "../../components/navigation-bar/navigation-bar"
+  }
+}

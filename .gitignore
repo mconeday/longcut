@@ -1,0 +1,2 @@
+# 微信开发者工具的本机私有配置（含本机路径/编译偏好），不随仓库走
+project.private.config.json

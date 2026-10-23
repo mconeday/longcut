@@ -1,0 +1,317 @@
+/* 导出画布：只出 JPEG，不参与布局。屏幕外但保留真实尺寸，0×0 机型拿不到 node */
+.export-canvas {
+  position: fixed;
+  left: -2000px;
+  top: 0;
+  width: 300px;
+  height: 424px;
+}
+
+/* 重命名半屏输入框 */
+.rn-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 88rpx;
+  margin-top: 28rpx;
+  padding: 0 24rpx;
+  background: var(--n-50, #F4F3EA);
+  border: 2rpx solid var(--brand-300, #B9C9AC);
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  color: var(--text-1, #1C1A17);
+}
+
+.rn-err {
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  color: var(--danger-700, #96231A);
+}
+
+.wrap {
+  padding: 80rpx 0 240rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 44rpx;
+  line-height: 60rpx;
+  font-weight: 600;
+  text-align: center;
+  max-width: var(--content-w);
+}
+
+.sub {
+  width: var(--content-w);
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  line-height: 44rpx;
+  color: var(--text-2);
+  text-align: center;
+}
+
+/* 成功勾：品牌蓝，不用绿 */
+.ok-icon {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: var(--brand-500);
+  color: #fff;
+  font-size: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+.warn-icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: #FBECEA;
+  color: var(--danger-500);
+  font-size: 52rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+/* 生成中转圈：用 border 画，不引图片 */
+.spin {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  border: 6rpx solid #DDE6EE;
+  border-top-color: var(--brand-500);
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 40rpx;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progress-line {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.compress {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: var(--text-3);
+}
+
+/* 文件卡 670×264（= 335×132） */
+.file {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24rpx;
+  padding: 28rpx;
+}
+
+/* 封面缩略：第 1 页 jpg；没有时用 assets/history/pdf.png 兜底 */
+.cover-img {
+  flex: none;
+  width: 80rpx;
+  height: 112rpx;
+  border: 2rpx solid var(--line);
+  border-radius: 6rpx;
+  background: #FBFAF7;
+}
+
+.pdf-default {
+  box-sizing: border-box;
+}
+
+.file-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.fname {
+  font-size: 32rpx;
+  line-height: 44rpx;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  margin-top: 8rpx;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  line-height: 32rpx;
+  color: var(--text-3);
+}
+
+/* 空态：哭脸 + 文案垂直居中。wrap 高度不定、flex:1 分不到空间，高度用 calc：
+   100vh − 自绘导航 − 340rpx（= 80+240 内边距 + 20 余量） */
+.empty-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.absent-ic {
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: 28rpx;
+}
+
+/* 灰提示：降质是成功了不是出错，不用警告色 */
+.note {
+  width: var(--content-w);
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  color: var(--text-2);
+}
+
+.tipbar {
+  width: var(--content-w);
+  margin-top: 24rpx;
+  height: 88rpx;
+  padding: 0 24rpx;
+  background: var(--brand-50);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.tipbar-t {
+  font-size: 26rpx;
+  color: var(--brand-700);
+  flex: 1;
+}
+
+.tipbar-a {
+  font-size: 26rpx;
+  color: var(--brand-500);
+}
+
+.rows {
+  width: var(--content-w);
+  margin-top: 32rpx;
+  background: var(--paper);
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.row {
+  height: 112rpx;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  color: var(--text-1);
+  border-bottom: 1rpx solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row-i {
+  width: 56rpx;
+  font-size: 32rpx;
+  color: var(--text-2);
+}
+
+.row-a {
+  margin-left: auto;
+  color: var(--text-3);
+}
+
+/* 转发到微信：终局动作独占大绿钮，压在动作列表下方 */
+.share-big {
+  width: var(--content-w);
+  height: 96rpx;
+  margin-top: 32rpx;
+  border-radius: 20rpx;
+  background: var(--brand-500);
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 底栏只剩「继续生成」时的通栏次按钮。白底压在浅绿渐变上没边界感，
+   加描边 + 两层投影托起来。.btn-sub 是全局组件，投影只写在本页，不往下游扩散 */
+.btn-wide {
+  width: var(--content-w);
+  flex: none;
+  border: 1rpx solid var(--brand-200);
+  background: var(--paper);
+  box-shadow: 0 2rpx 4rpx rgba(28, 26, 23, 0.06),
+    0 12rpx 24rpx rgba(28, 26, 23, 0.10);
+}
+
+/* 存储已满半屏 */
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40rpx 40rpx calc(40rpx + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-radius: 28rpx 28rpx 0 0;
+  box-sizing: border-box;
+}
+
+.sheet-title {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.sheet-sub {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  line-height: 44rpx;
+  color: var(--text-2);
+}
+
+.sheet-act {
+  margin-top: 40rpx;
+  display: flex;
+  gap: 20rpx;
+}
+
+.w127 {
+  width: 254rpx;
+  flex: none;
+}
+/* 流程态导航左上角小房子（WeUI left slot） */
+.nav-home {
+  display: block;
+  width: 19px;
+  height: 19px;
+}
+.nav-home-active { opacity: 0.5; }

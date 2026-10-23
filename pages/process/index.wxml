@@ -1,0 +1,104 @@
+<mp-navigation-bar title="处理中" background="#ffffff" />
+
+<view class="wrap" wx:if="{{phase === 'run'}}">
+  <view class="navrow">
+    <view class="stop {{canStop ? 'on' : ''}}" bindtap="onStop">停止</view>
+  </view>
+
+  <!-- §3b：S1 选了「仍然继续」→ 这句要留到 P3 结束，别让用户在等待时才想起来 -->
+  <view class="degraded-bar" wx:if="{{degraded}}">这张图较长，可能会处理失败</view>
+
+  <!-- 主视觉：进度环 + 纸形 + 纸中央百分比（环是唯一进度表达，禁止再加条形进度条） -->
+  <view class="ring" style="--p:{{pct}}">
+    <view class="paper-mini">
+      <text class="pct">{{pct}}</text><text class="pct-unit">%</text>
+    </view>
+  </view>
+
+  <view class="stage-text">{{stageText}}</view>
+
+  <view class="badge"><view class="dot"></view>本机处理中</view>
+  <!-- 设计 02 §3a 首次启动的例外：仅第一次进 P3，12 秒后淡出 -->
+  <view class="first-hint {{hint ? 'on' : ''}}">整台手机的飞行模式下都能完成</view>
+
+  <view class="stages">
+    <view class="stage" wx:for="{{stageNames}}" wx:key="*this">
+      <view class="mark {{index < stage ? 'done' : ''}} {{index === stage ? 'cur' : ''}}">
+        <text class="tick" wx:if="{{index < stage}}">✓</text>
+      </view>
+      <text class="sname {{index < stage ? 'on' : ''}} {{index === stage ? 'cur' : ''}}">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="slow" wx:if="{{slow}}">{{slowText}}</view>
+</view>
+
+<!-- 停止态（设计 02 §3c）：不归零、不清空，已排好的页能直接看 -->
+<view class="wrap stop-wrap" wx:elif="{{phase === 'stopped'}}">
+  <view class="pause-ring"><view class="pause-bar"></view><view class="pause-bar"></view></view>
+  <view class="stop-title">已停止</view>
+  <view class="stop-sub">已排好 {{donePages}} 页，可以先看</view>
+
+  <view class="stop-actions">
+    <view class="btn-main" bindtap="onViewPages">查看这 {{donePages}} 页</view>
+    <view class="btn-sub" bindtap="onBackPaper">回到纸张设置</view>
+  </view>
+</view>
+
+<view class="wrap err-wrap" wx:else>
+  <view class="warn">!</view>
+  <view class="err-title">{{errTitle}}</view>
+  <view class="err-sub">{{errSub}}</view>
+
+  <view class="err-actions">
+    <!-- 太大这一类给出口（§4.3 错误①）：单图 → 裁成 N 段；多图 → 分两批 -->
+    <view class="btn-main" wx:if="{{canSplit}}" bindtap="onSplit">{{splitMulti ? '分两批处理' : '分成 ' + splitCount + ' 段处理'}}</view>
+    <view class="btn-main" wx:else bindtap="onRetry">重试</view>
+    <view class="btn-sub" bindtap="onBackHome">换一张图</view>
+    <view class="btn-text" wx:if="{{canSplit}}" bindtap="onRetry">重试一次</view>
+  </view>
+</view>
+
+<!-- 分两批 / 分成 N 段：三步图文（§3b「分段处理」），不离开小程序。
+     多图时不能讲「把这张长图裁成 N 段」——原图不止一张，只能分批。 -->
+<view class="mask" wx:if="{{splitOpen}}" bindtap="onSplitClose">
+  <view class="sheet" catchtap="noop">
+    <block wx:if="{{splitMulti}}">
+      <view class="sheet-title">分两批处理</view>
+      <view class="sheet-sub">这 {{splitPic}} 张一起解码装不下，拆成两批就能过</view>
+      <view class="step">
+        <view class="step-n">1</view>
+        <view class="step-t">回到首页，把已选删到只剩前 {{splitKeep}} 张</view>
+      </view>
+      <view class="step">
+        <view class="step-n">2</view>
+        <view class="step-t">纸张设置会保留，直接生成第一份 PDF</view>
+      </view>
+      <view class="step">
+        <view class="step-n">3</view>
+        <view class="step-t">回到首页点「继续添加图片」选剩下的 {{splitRest}} 张，再生成第二份</view>
+      </view>
+      <view class="btn-main sheet-btn" bindtap="onSplitPick">回首页，先留 {{splitKeep}} 张</view>
+    </block>
+    <block wx:else>
+      <view class="sheet-title">分成 {{splitCount}} 段处理</view>
+      <view class="sheet-sub">不用去别的 App，就在相册里裁，裁完回来一次选进</view>
+      <view class="step">
+        <view class="step-n">1</view>
+        <view class="step-t">在手机相册里打开这张图，用「编辑」把它裁成 {{splitCount}} 段。{{splitNow}}</view>
+      </view>
+      <view class="step">
+        <view class="step-n">2</view>
+        <view class="step-t">回到这里，按从上到下的顺序把它们一起选中</view>
+      </view>
+      <view class="step">
+        <view class="step-n">3</view>
+        <view class="step-t">会自动拼成一张，跨段的地方自动切开，其它完全一样</view>
+      </view>
+      <view class="btn-main sheet-btn" bindtap="onSplitPick">去选这 {{splitCount}} 张图</view>
+    </block>
+  </view>
+</view>
+
+<!-- 兜底扫描画布：离屏画布不可用时用这个节点（不出现在版面上） -->
+<canvas type="2d" id="scan-canvas" class="scan-canvas"></canvas>

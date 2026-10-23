@@ -1,0 +1,257 @@
+/* P3 处理中：进度环、阶段列表、兜底提示 */
+.wrap {
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 右上「停止」按钮，44×44 热区 */
+.navrow {
+  width: var(--content-w);
+  height: 88rpx;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+.stop {
+  height: 88rpx;
+  line-height: 88rpx;
+  padding: 0 24rpx;
+  margin-right: -24rpx;
+  font-size: 30rpx;
+  color: #B8B2A5;              /* 600ms 内不可点 */
+  transition: color 180ms linear;
+}
+.stop.on { color: var(--text-2); }
+
+/* 降级提示条，与 P2 同款 */
+.degraded-bar {
+  width: var(--content-w);
+  min-height: 80rpx;
+  margin-bottom: 16rpx;
+  padding: 10rpx 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background: #FFF6E5;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  color: #8A5300;
+}
+
+/* 进度环 Ø120，环心放纸形 */
+.ring {
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: 50%;
+  background: #E2DFD6;                                    /* conic 不支持时的回落 */
+  background-image: conic-gradient(var(--brand-500) calc(var(--p) * 1%), #E4E0D6 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 8rpx;
+}
+.ring::after {
+  content: '';
+  position: absolute;
+  inset: 3rpx;                  /* 环厚 1.5px */
+  border-radius: 50%;
+  background: var(--page-bg-top);   /* 环心透出页面底色 */
+}
+.paper-mini {
+  position: relative;
+  z-index: 1;
+  width: 132rpx;
+  height: 186rpx;
+  background: var(--paper);
+  border: 1rpx solid var(--line);
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pct { font-size: 56rpx; line-height: 68rpx; font-weight: 600; letter-spacing: -1rpx; }
+.pct-unit { font-size: 26rpx; font-weight: 500; margin-left: 1rpx; align-self: flex-end; line-height: 34rpx; }
+
+.stage-text {
+  margin-top: 64rpx;
+  font-size: 32rpx;
+  line-height: 48rpx;
+  color: var(--text-1);
+}
+
+.badge {
+  margin-top: 24rpx;
+  height: 56rpx;
+  padding: 0 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  background: var(--paper);
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: var(--text-2);
+}
+.dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #3E9B5F; }
+
+.stages {
+  margin-top: 64rpx;
+  width: 440rpx;
+}
+.stage {
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.mark {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  border: 2rpx solid #D8D4CA;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.mark.done { background: var(--brand-500); border-color: var(--brand-500); }
+.mark.cur { background: var(--brand-500); border-color: var(--brand-500); animation: breathe 1.2s ease-in-out infinite; }
+.tick { font-size: 16rpx; color: #FFFFFF; line-height: 1; }
+.sname { font-size: 28rpx; color: #D8D4CA; }
+.sname.on { color: var(--text-2); }
+.sname.cur { color: var(--brand-700); font-weight: 500; }
+
+@keyframes breathe {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .55; transform: scale(.86); }
+}
+
+/* 超过 8s 才出现的兜底提示 */
+.slow {
+  margin-top: 48rpx;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  color: #8A5300;
+}
+
+/* 错误态 */
+.err-wrap { padding-top: 240rpx; }
+.warn {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: #FDECEA;
+  color: var(--danger-500);
+  font-size: 52rpx;
+  font-weight: 600;
+  line-height: 96rpx;
+  text-align: center;
+}
+/* 错误态标题与说明：定宽居中，标题/说明/按钮左缘对齐 */
+.err-title {
+  margin-top: 48rpx;
+  width: var(--content-w);
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  text-align: center;
+  font-size: 36rpx;
+  line-height: 48rpx;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.err-sub {
+  margin-top: 16rpx;
+  width: var(--content-w);
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  text-align: center;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  color: var(--text-2);
+}
+.err-actions {
+  margin-top: 80rpx;
+  width: var(--content-w);
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+/* 竖排时 .btn-sub 的 flex:1 会把高度压成 0，这里显式给高 */
+.err-actions .btn-sub { flex: none; height: 88rpx; }
+
+/* 兜底扫描画布：挪出可视区 */
+.scan-canvas {
+  position: fixed;
+  left: -2000rpx;
+  top: 0;
+  width: 2rpx;
+  height: 2rpx;
+}
+
+/* 首次进入的 12 秒提示行 */
+.first-hint {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  line-height: 36rpx;
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity 400ms linear;
+}
+.first-hint.on { opacity: 1; }
+
+/* 停止态 */
+.stop-wrap { padding-top: 240rpx; }
+.pause-ring {
+  width: 96rpx; height: 96rpx; border-radius: 50%;
+  background: var(--paper); border: 2rpx solid var(--line);
+  display: flex; align-items: center; justify-content: center; gap: 8rpx;
+}
+.pause-bar { width: 8rpx; height: 28rpx; border-radius: 2rpx; background: var(--text-3); }
+.stop-title {
+  margin-top: 48rpx;
+  font-size: 36rpx; line-height: 48rpx; font-weight: 600; color: var(--text-1);
+}
+.stop-sub {
+  margin-top: 16rpx;
+  font-size: 28rpx; line-height: 40rpx; color: var(--text-2);
+}
+.stop-actions {
+  margin-top: 80rpx; width: var(--content-w);
+  display: flex; flex-direction: column; gap: 16rpx;
+}
+.stop-actions .btn-sub { flex: none; height: 88rpx; }
+
+/* 文字按钮，44 高热区 */
+.btn-text {
+  height: 88rpx; line-height: 88rpx; text-align: center;
+  font-size: 30rpx; color: var(--brand-700);
+}
+
+/* 分成 N 段半屏 */
+.mask {
+  position: fixed; left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(28,26,23,.42);
+  display: flex; align-items: flex-end;
+  z-index: 20;
+}
+.sheet {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--paper);
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx 40rpx calc(40rpx + env(safe-area-inset-bottom));
+}
+.sheet-title { font-size: 34rpx; line-height: 48rpx; font-weight: 600; color: var(--text-1); }
+.sheet-sub { margin-top: 12rpx; font-size: 28rpx; line-height: 40rpx; color: var(--text-2); }
+.step { display: flex; gap: 20rpx; margin-top: 28rpx; }
+.step-n {
+  flex: none; width: 40rpx; height: 40rpx; border-radius: 50%;
+  background: var(--brand-50); color: var(--brand-700);
+  font-size: 24rpx; line-height: 40rpx; text-align: center;
+}
+.step-t { flex: 1; font-size: 28rpx; line-height: 42rpx; color: var(--text-1); }
+.sheet-btn { margin-top: 40rpx; }

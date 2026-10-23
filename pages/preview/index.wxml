@@ -1,0 +1,120 @@
+<!-- 三段定高（设计 02 §2.4）：中间纸张区自己滚，缩略条与吸底栏常驻。
+     以前整页一起滚，缩略条排在文档流末尾，滚到底就钻进底栏底下被压住半截
+     （2026-10-20 爸爸截图）；钉成 fixed 又会被同层 canvas 压住（离场遮罩那次
+     的教训），所以让它们各占一段、谁也不许重叠。 -->
+<mp-navigation-bar title="分页预览" background="#ffffff" back="{{hasBack}}">
+  <!-- 栈里没有上一页（从 P6 失败态 redirectTo 回来）：箭头换成「回纸张设置」。
+       草稿 job 还在，纸张页能正常渲染 -->
+  <view slot="left" wx:if="{{!hasBack}}" class="nav-plain-back" bindtap="onNavPaper" aria-role="button" aria-label="返回纸张设置"></view>
+</mp-navigation-bar>
+
+<view class="wrap" style="height: calc(100vh - {{navH}}px)">
+ <view class="stage">
+  <view class="badge"><view class="dot"></view>本机处理完成</view>
+
+  <!-- 4.4.1 均分退化：三层提示的第一层。文案逐句校验过，不许改写 -->
+  <!-- 整组降采样（设备解不动原图高度）：内容都在，但清晰度低于原图，必须说 -->
+  <view class="amber" wx:if="{{scaledK > 0 && scaledK < 1 && !amberClosed}}">
+    <view class="amber-row">
+      <text class="amber-text">这台手机解不动原图的尺寸，预览按 {{scaledPercent}}% 显示；导出 PDF 仍按原图裁切，不影响打印。</text>
+      <text class="amber-x" bindtap="onCloseAmber">×</text>
+    </view>
+  </view>
+  <view class="amber" wx:if="{{degraded && !amberClosed}}">
+    <view class="amber-row">
+      <text class="amber-text">没找到安全切点，按平均高度切的。内容都在，只是有几行字可能被切开。</text>
+      <text class="amber-x" bindtap="onCloseAmber">×</text>
+    </view>
+    <view class="amber-act" bindtap="onAdjust">去手动调整 ›</view>
+  </view>
+  <view class="amber-mini" wx:if="{{degraded && amberClosed}}">⚠ 自动均分</view>
+
+  <!-- 停止态回看（§3c）：常驻琥珀条 + 继续处理剩余页 -->
+  <view class="amber" wx:if="{{partial}}">
+    <view class="amber-row">
+      <text class="amber-text">本次只处理了前 {{partial.done}} 页（原预计 {{partial.est}} 页）</text>
+    </view>
+    <view class="amber-act" bindtap="onContinue">继续处理剩余 {{partial.est - partial.done}} 页 ›</view>
+  </view>
+
+  <!-- 处理途中系统报过内存告警（level 10，没到闪退那一步）。不吓人，
+       只把「这次是勉强扛过去的」说明白：再加图就会失败，先说在前面 -->
+  <view class="gray-tip" wx:if="{{memWarn}}">
+    这次处理时手机内存有点吃紧，已经处理完了。图片再多的话，建议分两批。
+  </view>
+
+  <view class="gray-tip" wx:if="{{tooMany}}">共 {{total}} 页，可左右滑动或用下方缩略图快速跳转</view>
+
+  <!-- 日期行（R4）：识别到聊天记录里的日期时说明一句，用户才知道
+       「为什么有一页没装满」——为日期让位会空出十几行，不说清楚像排错了 -->
+  <view class="gray-tip" wx:if="{{stampCount}}">
+    识别到 {{stampCount}} 处聊天日期，已让每页从日期后面开始，不会把日期单独留在页底
+  </view>
+
+  <!-- 色差预检提示已按用户要求整条移除（2026-10-20）：lowContrast 数据仍在 JS 里，只是不再展示 -->
+
+  <view class="paper-wrap">
+    <view class="arrow" bindtap="onPrev">‹</view>
+    <view class="paper-card">
+      <view class="paper" style="{{paperH ? 'height:' + paperH + 'px' : ''}}">
+      <view class="content">
+        <canvas class="page-canvas {{leaving ? 'cv-hide' : ''}}" type="2d" id="page-canvas"></canvas>
+        <view class="draw-loading" wx:if="{{drawState==='loading'}}">正在画出这一页…</view>
+        <view class="draw-fail" wx:if="{{drawState==='fail'}}" bindtap="onRepaint">
+          <text class="draw-fail-t">这一页没画出来</text>
+          <text class="draw-fail-s">点这里重试</text>
+        </view>
+      </view>
+      <view class="corner tl"></view><view class="corner tr"></view>
+      <view class="corner bl"></view><view class="corner br"></view>
+      <view class="pagenum" wx:if="{{cur===total}}">{{cur}} / {{total}}</view>
+      <view class="chip-top" wx:if="{{cur>1}}">↑ 接上页</view>
+      <view class="chip-bot" wx:if="{{cur<total}}">接下页 ↓</view>
+      </view>
+    </view>
+    <view class="arrow" bindtap="onNext">›</view>
+  </view>
+
+  <!-- §5 第 49 条：涉及他人聊天记录，前 2 次进 P4 提示一次 -->
+  <view class="auth-hint" wx:if="{{authHint}}">涉及他人的聊天记录，请确认已获得对方同意</view>
+ </view>
+
+  <!-- 缩略图条（§2.4 元素 7）：真缩略图，不是页码。整条是一张图，点按靠透明热区 -->
+  <scroll-view class="thumbs" scroll-x scroll-with-animation
+               style="{{useNums ? '' : 'height:' + (thumbH + 24) + 'px'}}">
+    <block wx:if="{{useNums}}">
+      <view class="strip-center">
+        <view class="strip-row">
+          <view class="thumb-num {{cur===index+1?'cur':''}}" wx:for="{{thumbs}}" wx:key="*this"
+                wx:for-index="index" data-p="{{index+1}}" bindtap="onJump">{{item + 1}}</view>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <!-- 页数少时居中，超出屏宽才滚动（min-width:100% 双向兼顾：窄→居中，宽→自然撑开） -->
+      <view class="strip-center">
+        <view class="strip-row">
+          <view class="thumb-item {{cur===index+1?'cur':''}}" wx:for="{{thumbs}}" wx:key="*this"
+                wx:for-index="index" style="width:{{thumbW}}px;height:{{thumbH}}px"
+                data-p="{{index+1}}" bindtap="onJump">
+            <image wx:if="{{strip}}" class="thumb-img" src="{{strip}}" mode="scaleToFill"
+                   style="left:{{-index*pitch}}px;width:{{stripW}}px;height:{{thumbH}}px" />
+            <view class="thumb-no">{{index+1}}</view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <!-- 离场遮罩：纸底与 canvas 不同渲染层，转场首帧会错位，跳页前先盖成实色 -->
+  <view class="leave-mask" wx:if="{{leaving}}"></view>
+
+  <view class="bottombar">
+    <view class="btn-sub" bindtap="onAdjust">手动调整分页</view>
+    <view class="btn-main w200" bindtap="onExport">导出 PDF</view>
+  </view>
+</view>
+
+<!-- 缩略条离屏画布的降级节点：只有老基础库（无 createOffscreenCanvas）才渲染。
+     默认不渲染 —— 同层组件「藏」在页面里迟早会浮出来（真机两次实锤）。 -->
+<canvas wx:if="{{legacyThumbCanvas}}" type="2d" id="thumb-canvas" class="thumb-canvas"></canvas>

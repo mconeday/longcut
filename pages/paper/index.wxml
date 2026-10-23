@@ -1,0 +1,124 @@
+<mp-navigation-bar title="纸张设置" background="#ffffff" />
+
+<view class="wrap">
+  <!-- §3b：S1 里选了「仍然继续」→ 琥珀条一直保留到 P3 结束 -->
+  <view class="warn-bar" wx:if="{{degraded}}">这张图较长，可能会处理失败</view>
+
+  <!-- 纸张预览卡（§2.2 元素 2~6）：三个联动项全在这张卡里 -->
+  <view class="paper-card {{folded ? 'fold' : ''}}" aria-role="group" aria-label="纸张预览">
+    <view class="est" wx:if="{{!folded}}">
+      <text class="est-k">预计</text>
+      <text class="est-v">{{estText}}</text>
+      <text class="est-u">页</text>
+    </view>
+
+    <view class="paper-stage">
+      <view class="paper-mini" style="width:{{paperW}}rpx;height:{{paperH}}rpx">
+        <view class="pm-pad" style="padding:{{padRpx}}rpx">
+          <view class="pm-content">
+            <view class="corner c-tl"></view>
+            <view class="corner c-tr"></view>
+            <view class="corner c-bl"></view>
+            <view class="corner c-br"></view>
+            <!-- §3f：跨图处画 1px 虚线，一眼看出"这里换了一张图" -->
+            <view class="seam" wx:for="{{seams}}" wx:key="*this" style="top:{{item}}rpx"></view>
+            <view class="ph" style="width:100%"></view>
+            <view class="ph" style="width:88%"></view>
+            <view class="ph" style="width:96%"></view>
+            <view class="ph" style="width:72%"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="paper-caption" wx:if="{{!folded}}">{{caption}}</view>
+
+    <!-- 折叠态右列：读数 + 两行标注（右列装不下一整串，截短会丢尺寸） -->
+    <view class="foldcol" wx:if="{{folded}}">
+      <view class="foldpages">
+        <text class="est-k">预计</text>
+        <text class="fold-v">{{estText}}</text>
+        <text class="est-u">页</text>
+      </view>
+      <view class="foldcap">
+        <text class="foldcap-n">{{paperName}}</text>
+        <text class="foldcap-s">{{paperSize}}</text>
+      </view>
+    </view>
+
+    <view class="fold-btn" bindtap="onFold"
+          aria-role="button" aria-label="{{folded ? '展开纸张预览' : '收起纸张预览'}}">
+      <view class="chev chev-up"></view>
+      <view class="chev chev-dn"></view>
+    </view>
+  </view>
+
+  <!-- §3f：尺寸标注的下一行 -->
+  <view class="seam-note" wx:if="{{multi}}">{{seamNote}}</view>
+
+  <!-- §4.2 边界：页数过多不拦，只提醒 -->
+  <view class="amber-bar" wx:if="{{tooMany}}">{{tooManyText}}</view>
+
+  <!-- §2.2 超短图特例：一页放得下 → 隐藏方向/边距/开关，只留一句结论 -->
+  <view class="short-card" wx:if="{{short}}">
+    <view class="short-main">
+      <view class="short-t">这张图一页就能放下</view>
+      <view class="short-s">将按「缩到一页」排版，不切分</view>
+    </view>
+    <view class="short-act" bindtap="onShortSplit">仍然分页</view>
+  </view>
+
+  <view class="card pad">
+    <view class="row-label">纸张规格</view>
+    <view class="specs">
+      <view wx:for="{{specs}}" wx:key="key"
+            class="spec {{setting.paper===item.key?'on':''}}"
+            data-key="{{item.key}}" bindtap="onPaper">
+        <view class="spec-box" style="width:{{item.bw}}rpx;height:{{item.bh}}rpx"></view>
+        <view class="spec-name">{{item.name}}</view>
+        <view class="check" wx:if="{{setting.paper===item.key}}">✓</view>
+      </view>
+    </view>
+
+    <block wx:if="{{!short}}">
+      <view class="row-line">
+        <text class="row-label">方向</text>
+        <view class="seg">
+          <view class="seg-item {{setting.landscape?'':'on'}}" data-v="0" bindtap="onOrient">纵向</view>
+          <view class="seg-item {{setting.landscape?'on':''}}" data-v="1" bindtap="onOrient">横向</view>
+        </view>
+      </view>
+
+      <view class="row-line">
+        <text class="row-label">页边距</text>
+        <text class="margin-val">{{setting.margin}}<text class="unit">mm</text></text>
+      </view>
+      <slider min="5" max="30" step="1" value="{{setting.margin}}" activeColor="#2E8455"
+              block-size="24" bindchange="onMargin" />
+      <view class="ticks"><text>5</text><text>10</text><text>30</text></view>
+
+      <view class="chips">
+        <view class="chip {{setting.margin===10?'on':''}}" data-v="10" bindtap="onQuick">10mm（推荐）</view>
+        <view class="chip {{setting.margin===15?'on':''}}" data-v="15" bindtap="onQuick">15mm</view>
+        <view class="chip {{setting.margin===20?'on':''}}" data-v="20" bindtap="onQuick">20mm</view>
+      </view>
+
+      <!-- §2.2 元素 12：仅多图且至少 1 张 < 单页容量时占位，不满足整行不渲染 -->
+      <view class="switch-row" wx:if="{{showSwitch}}" bindtap="onSwitch"
+            aria-role="switch" aria-checked="{{perImage ? 'true' : 'false'}}"
+            aria-label="{{perImage ? '让小图各占一页。已开启。每张小图从新的一页开始，不满一页留白' : '让小图各占一页。已关闭。当前按连续排版，跨图处会自动切分'}}">
+        <text class="switch-main">让小图各占一页</text>
+        <view class="switch-track {{perImage ? 'on' : ''}}"><view class="switch-thumb"></view></view>
+      </view>
+      <view class="switch-note" wx:if="{{perImage}}">{{switchNote}}</view>
+    </block>
+
+    <view class="hint {{hintWarn ? 'warn' : ''}}">{{hintText}}</view>
+  </view>
+
+  <view class="err-line" wx:if="{{noSize}}">读不到这张图的尺寸，换一张试试</view>
+
+  <view class="bottombar">
+    <view class="btn-main {{noSize ? 'disabled' : ''}}" bindtap="onNext">{{btnText}}</view>
+  </view>
+</view>

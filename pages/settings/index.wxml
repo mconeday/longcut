@@ -1,0 +1,46 @@
+<mp-navigation-bar title="设置与隐私" background="#ffffff" />
+
+<view class="wrap">
+  <!-- 隐私卡（设计稿 p8 v2）：只说能力事实，不出现请求次数（02 §2.8 已作废） -->
+  <view class="card">
+    <view class="off-row">
+      <view class="off-ic">✈</view>
+      <view class="off-main">
+        <view class="off-t">全程离线可用</view>
+        <view class="off-s">不联网、不上传，图片不离开这台手机</view>
+      </view>
+    </view>
+    <view class="netlink" bindtap="onS5Open">
+      <text class="netlink-t">无网也能用，怎么验？</text>
+      <text class="netlink-a">›</text>
+    </view>
+  </view>
+
+  <view class="sep"></view>
+
+  <view class="row" bindtap="onClearFiles">
+    <view class="row-ic"><view class="ic-trash"></view></view>
+    <text class="row-t">清理本地文件</text>
+    <text class="row-v">已用 {{usedText}}</text>
+    <text class="row-a">›</text>
+  </view>
+  <view class="row" bindtap="onHelp">
+    <view class="row-ic"><text class="ic-glyph">?</text></view>
+    <text class="row-t">使用帮助</text>
+    <text class="row-a">›</text>
+  </view>
+  <view class="row" bindtap="onAbout">
+    <view class="row-ic"><text class="ic-glyph">i</text></view>
+    <text class="row-t">关于</text>
+    <text class="row-v">版本 {{version}}</text>
+    <text class="row-a">›</text>
+  </view>
+</view>
+
+<!-- S5 隐私自证：半屏 sheet，三步可执行（§5 第 46/47 条） -->
+<view class="mask" wx:if="{{sheetOpen}}" catchtap="onS5Close"></view>
+<view class="sheet" wx:if="{{sheetOpen}}">
+  <view class="sheet-t">断开网络也能用</view>
+  <view class="step" wx:for="{{steps}}" wx:key="*this">{{item}}</view>
+  <view class="btn-main" bindtap="onS5Close">我看过了</view>
+</view>

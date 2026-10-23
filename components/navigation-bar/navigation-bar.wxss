@@ -1,0 +1,70 @@
+/* 导航栏样式，取自 weui.wxss（wechat-miniprogram/weui-miniprogram，MIT）
+   高度对齐原生：iOS 44px / Android 48px；--right 为胶囊留位 */
+.weui-navigation-bar {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.9);
+}
+.weui-navigation-bar .ios {
+  --height: 44px;
+  --right: 184rpx;
+}
+.weui-navigation-bar .android {
+  --height: 48px;
+  --right: 222rpx;
+}
+.weui-navigation-bar__inner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5001;
+  height: var(--height);
+  padding-right: var(--right);
+  width: calc(100% - var(--right));
+  display: flex;
+  align-items: center;
+}
+.weui-navigation-bar__inner .weui-navigation-bar__left {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: var(--right);
+  padding-left: 16px;
+}
+.weui-navigation-bar__btn_goback_wrapper {
+  padding: 11px 18px 11px 16px;
+  margin: -11px -18px -11px -16px;
+}
+.weui-navigation-bar__inner .weui-navigation-bar__left .weui-navigation-bar__btn_goback {
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  font-size: 12px;
+  width: 1em;
+  height: 2em;
+  -webkit-mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='24' viewBox='0 0 12 24'%3E  %3Cpath fill-opacity='.9' fill-rule='evenodd' d='M10 19.438L8.955 20.5l-7.666-7.79a1.02 1.02 0 0 1 0-1.42L8.955 3.5 10 4.563 2.682 12 10 19.438z'/%3E%3C/svg%3E") no-repeat 50% 50%;
+  mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='24' viewBox='0 0 12 24'%3E  %3Cpath fill-opacity='.9' fill-rule='evenodd' d='M10 19.438L8.955 20.5l-7.666-7.79a1.02 1.02 0 0 1 0-1.42L8.955 3.5 10 4.563 2.682 12 10 19.438z'/%3E%3C/svg%3E") no-repeat 50% 50%;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  background-color: currentColor;
+}
+.weui-navigation-bar__inner .weui-navigation-bar__left .weui-navigation-bar__btn_goback:active {
+  opacity: 0.5;
+}
+.weui-navigation-bar__inner .weui-navigation-bar__center {
+  font-size: 17px;
+  text-align: center;
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.weui-navigation-bar__inner .weui-navigation-bar__right {
+  margin-right: 16px;
+}
+.weui-navigation-bar__placeholder {
+  height: var(--height);
+  background: #ffffff;
+  position: relative;
+  z-index: 50;
+}

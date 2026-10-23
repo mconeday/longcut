@@ -1,0 +1,44 @@
+<mp-navigation-bar title="历史" background="#ffffff" />
+
+<view class="wrap" style="height: calc(100vh - {{navH}}px)">
+  <view class="hintbar">
+    <text class="hint">本地保留 7 天，到期自动删除</text>
+    <!-- 「清空」是危险文字按钮：设计稿放导航栏右端，系统导航栏放不进去，改放这里 -->
+    <text class="clear {{canClear ? '' : 'off'}}" catchtap="onClearAll">清空</text>
+  </view>
+
+  <scroll-view class="list" scroll-y wx:if="{{!empty}}">
+    <!-- 行高 76px：左滑露出 80px 删除，点行进 P6 查看态 -->
+    <view class="row" wx:for="{{list}}" wx:key="ts">
+      <view class="row-del" data-i="{{index}}" catchtap="onDelete">删除</view>
+      <view class="row-main {{item.x < 0 ? 'open' : ''}}"
+            style="transform: translateX({{item.x}}px)"
+            data-i="{{index}}"
+            bindtouchstart="onTouchStart"
+            bindtouchmove="onTouchMove"
+            bindtouchend="onTouchEnd"
+            bindtouchcancel="onTouchEnd"
+            bindtap="onOpen">
+        <!-- 封面：有 cover 显示第 1 页缩略图（pdfJob 渲染模式取第 1 页 jpg /
+             直嵌模式压第 1 张源图，见 P6）；图片挂了（binderror）或没有 cover
+             都走爸爸提供的默认 pdf.png（assets/history/pdf.png） -->
+        <image wx:if="{{item.cover}}" class="paper-cover" src="{{item.cover}}" mode="aspectFill"
+               binderror="onCoverErr" data-i="{{index}}" />
+        <image wx:else class="paper-icon pdf-default" src="/assets/history/pdf.png" mode="aspectFit" />
+        <view class="row-body">
+          <view class="fname">{{item.filename}}</view>
+          <view class="meta {{item.gone ? 'gone' : ''}}">{{item.metaText}}</view>
+        </view>
+        <text class="row-a">›</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="empty" wx:else>
+    <view class="paper-big"></view>
+    <view class="empty-t">还没有历史文件</view>
+    <view class="empty-s">生成的 PDF 会在这里保留 7 天，到期自动删除</view>
+  </view>
+
+  <!-- 2026-10-21 爸爸定：底部主按钮已撤，返回键就是出口，不重复给入口 -->
+</view>
